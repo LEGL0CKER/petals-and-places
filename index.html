@@ -486,6 +486,35 @@ footer { background:var(--charcoal); color:white; padding:56px 0 28px; }
   background: none; border: none; cursor: pointer;
   color: var(--rose); font-size: .8rem; padding: 0 2px; line-height: 1;
 }
+
+/* Checkout modal extras */
+.checkout-order-summary {
+  background: var(--mist);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+.checkout-summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(193,96,106,.1);
+  font-size: .88rem;
+}
+.checkout-summary-item:last-child { border-bottom: none; }
+.checkout-summary-name { color: var(--deep); font-family: 'Cormorant Garamond', serif; font-size: .95rem; }
+.checkout-summary-addons { font-size: .76rem; color: #8a6b6b; margin-top: 2px; }
+.checkout-summary-price { color: var(--rose); font-family: 'Cormorant Garamond', serif; font-size: 1rem; white-space: nowrap; margin-left: 12px; }
+.checkout-total-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 0 0; margin-top: 4px;
+  border-top: 2px solid rgba(193,96,106,.2);
+}
+.checkout-total-label { font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; color: #6b4f4f; }
+.checkout-total-price { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; color: var(--deep); }
 </style>
 </head>
 <body>
@@ -520,6 +549,57 @@ footer { background:var(--charcoal); color:white; padding:56px 0 28px; }
   </div>
 </div>
 
+<!-- Checkout Modal -->
+<div class="modal-overlay" id="checkoutModal">
+  <div class="modal" style="max-width:560px;">
+    <button class="modal-close" onclick="closeCheckoutModal()">✕</button>
+    <div class="modal-icon">🛒</div>
+    <div class="modal-title">Checkout</div>
+    <div class="modal-sub">Almost there! Fill in your info and we will reach out to confirm your order.</div>
+
+    <!-- Order Summary -->
+    <div style="font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--rose);font-weight:500;margin-bottom:8px;">Your Order</div>
+    <div class="checkout-order-summary" id="checkoutSummary"></div>
+
+    <!-- Contact Info -->
+    <div style="font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--rose);font-weight:500;margin-bottom:10px;margin-top:4px;">Your Info</div>
+    <div class="mfg-row">
+      <div class="mfg"><label>First & Last Name *</label><input type="text" id="co-name" placeholder="Jane Smith"></div>
+      <div class="mfg"><label>Phone Number *</label><input type="tel" id="co-phone" placeholder="(713) 555-0000"></div>
+    </div>
+    <div class="mfg"><label>Email Address</label><input type="email" id="co-email" placeholder="jane@email.com"></div>
+    <div class="mfg-row">
+      <div class="mfg"><label>Instagram Handle</label><input type="text" id="co-ig" placeholder="@yourhandle"></div>
+      <div class="mfg"><label>Date Needed *</label><input type="date" id="co-date"></div>
+    </div>
+    <div class="mfg"><label>Occasion</label>
+      <select id="co-occasion">
+        <option value="">Select one...</option>
+        <option>Birthday</option><option>Anniversary</option><option>Graduation</option>
+        <option>Wedding</option><option>Valentine's Day</option><option>Mother's Day</option>
+        <option>Just Because</option><option>Other</option>
+      </select>
+    </div>
+
+    <!-- Notes -->
+    <div style="font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--rose);font-weight:500;margin-bottom:10px;margin-top:4px;">Notes & Special Requests</div>
+    <div class="mfg"><label>Banner Text / Color Preferences / Anything Else</label>
+      <textarea id="co-notes" rows="3" placeholder="e.g. Banner should say Happy Birthday Maria, prefer pink and white roses, ribbon color gold..."></textarea>
+    </div>
+
+    <!-- Total -->
+    <div class="checkout-total-row">
+      <span class="checkout-total-label">Order Total</span>
+      <span class="checkout-total-price" id="checkoutTotal">$0</span>
+    </div>
+
+    <button class="btn-primary" style="width:100%;text-align:center;display:block;padding:16px;margin-top:16px;font-size:.88rem;" onclick="submitCheckout()">
+      Send Order Request 💌
+    </button>
+    <p style="text-align:center;font-size:.74rem;color:#8a6b6b;margin-top:10px;">We will contact you within 24 hours to confirm details and arrange payment.</p>
+  </div>
+</div>
+
 <!-- Cart Sidebar -->
 <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
 <div class="cart-sidebar" id="cartSidebar">
@@ -535,7 +615,7 @@ footer { background:var(--charcoal); color:white; padding:56px 0 28px; }
       <span class="cart-subtotal-label">Subtotal</span>
       <span class="cart-subtotal-price" id="cartTotal">$0</span>
     </div>
-    <button class="btn-checkout-cart" onclick="handleCheckout()">Proceed to Checkout →</button>
+    <button class="btn-checkout-cart" onclick="openCheckoutModal()">Proceed to Checkout →</button>
     <p class="cart-note">🔒 Secure checkout powered by Stripe</p>
   </div>
 </div>
@@ -994,8 +1074,7 @@ function addToCartBtn(btn) {
 function addToCart(name, price) {
   cart.push({ name, price, addons: [] });
   updateCartUI();
-  openCart();
-  showToast('Added: ' + name + ' 🌸');
+  showToast('Added to cart: ' + name + ' 🌸');
 }
 function removeFromCart(i) {
   cart.splice(i, 1);
@@ -1092,7 +1171,6 @@ function attachAddon(cartIdx) {
   pendingAddon = null;
   closeAddonModal();
   updateCartUI();
-  openCart();
   showToast('Add-on attached! 🌸');
 }
 
@@ -1104,15 +1182,78 @@ document.getElementById('addonModal').addEventListener('click', function(e) {
   if (e.target === this) closeAddonModal();
 });
 
-// ── Stripe Checkout ───────────────────────
-// Replace with your real Stripe Payment Link URL from dashboard.stripe.com
-const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/REPLACE_WITH_YOUR_LINK';
+// ── Checkout Modal ────────────────────────
+function openCheckoutModal() {
+  if (!cart.length) { showToast('Add items to your cart first! 🌸'); return; }
+  // Populate order summary
+  const summary = document.getElementById('checkoutSummary');
+  summary.innerHTML = cart.map(item => {
+    const addonsText = item.addons.length
+      ? '<div class="checkout-summary-addons">+ ' + item.addons.map(a => a.name + ' ($' + a.price + ')').join(', ') + '</div>'
+      : '';
+    return '<div class="checkout-summary-item"><div><div class="checkout-summary-name">' + item.name + '</div>' + addonsText + '</div><div class="checkout-summary-price">$' + itemTotal(item) + '</div></div>';
+  }).join('');
+  document.getElementById('checkoutTotal').textContent = '$' + cartGrandTotal();
+  // Set min date to today
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('co-date').min = today;
+  document.getElementById('checkoutModal').classList.add('open');
+  closeCart();
+}
 
-function handleCheckout() {
-  if (!cart.length) { showToast('Add items first! 🌸'); return; }
-  // Once you have a Stripe Payment Link, replace the URL above and uncomment:
-  // window.open(STRIPE_PAYMENT_LINK, '_blank');
-  showToast('Setting up payments soon! DM @petalsnplaces 💌');
+function closeCheckoutModal() {
+  document.getElementById('checkoutModal').classList.remove('open');
+}
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('checkoutModal').addEventListener('click', function(e) {
+    if (e.target === this) closeCheckoutModal();
+  });
+});
+
+function submitCheckout() {
+  const name  = document.getElementById('co-name').value.trim();
+  const phone = document.getElementById('co-phone').value.trim();
+  const date  = document.getElementById('co-date').value;
+  if (!name)  { showToast('Please enter your name!'); return; }
+  if (!phone) { showToast('Please enter your phone number!'); return; }
+  if (!date)  { showToast('Please select a date needed!'); return; }
+
+  const email    = document.getElementById('co-email').value.trim();
+  const ig       = document.getElementById('co-ig').value.trim();
+  const occasion = document.getElementById('co-occasion').value;
+  const notes    = document.getElementById('co-notes').value.trim();
+
+  // Build order summary text for the message
+  const orderLines = cart.map(item => {
+    const addons = item.addons.length ? ' [+ ' + item.addons.map(a => a.name).join(', ') + ']' : '';
+    return item.name + addons + ' - $' + itemTotal(item);
+  }).join('\n');
+
+  // Send via mailto as fallback (swap for a real backend/Formspree later)
+  const subject = encodeURIComponent('New Order from ' + name + ' - Petals & Places');
+  const body = encodeURIComponent(
+    'NEW ORDER REQUEST\n' +
+    '================\n\n' +
+    'CUSTOMER INFO\n' +
+    'Name: ' + name + '\n' +
+    'Phone: ' + phone + '\n' +
+    (email ? 'Email: ' + email + '\n' : '') +
+    (ig ? 'Instagram: ' + ig + '\n' : '') +
+    'Date Needed: ' + date + '\n' +
+    (occasion ? 'Occasion: ' + occasion + '\n' : '') +
+    '\nORDER\n' + orderLines +
+    '\nTotal: $' + cartGrandTotal() +
+    (notes ? '\n\nNOTES\n' + notes : '')
+  );
+
+  window.location.href = 'mailto:petalsnplaces@gmail.com?subject=' + subject + '&body=' + body;
+
+  showToast('Order sent! We will be in touch soon 💌');
+  setTimeout(() => {
+    closeCheckoutModal();
+    cart = [];
+    updateCartUI();
+  }, 1500);
 }
 
 // ── Modal ─────────────────────────────────
