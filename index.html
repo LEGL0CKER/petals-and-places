@@ -1050,6 +1050,13 @@ function closeCart() {
 // ── Add-on Picker ─────────────────────────
 let pendingAddon = null;
 
+function openAddonPickerFromEl(el) {
+  openAddonPicker(
+    el.getAttribute('data-addon-name'),
+    el.getAttribute('data-addon-label'),
+    parseInt(el.getAttribute('data-addon-price'))
+  );
+}
 function openAddonPicker(name, priceLabel, price) {
   pendingAddon = { name, price };
   document.getElementById('addonModalTitle').textContent = name;
