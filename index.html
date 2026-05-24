@@ -594,9 +594,9 @@ footer { background:var(--charcoal); color:white; padding:56px 0 28px; }
     </div>
 
     <button class="btn-primary" style="width:100%;text-align:center;display:block;padding:16px;margin-top:16px;font-size:.88rem;" onclick="submitCheckout()">
-      Send Order Request 💌
+      Pay with Stripe 💳
     </button>
-    <p style="text-align:center;font-size:.74rem;color:#8a6b6b;margin-top:10px;">We will contact you within 24 hours to confirm details and arrange payment.</p>
+    <p style="text-align:center;font-size:.74rem;color:#8a6b6b;margin-top:10px;">🔒 Secure payment powered by Stripe. Your order details are sent to us automatically.</p>
   </div>
 </div>
 
@@ -1210,6 +1210,9 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
+// ── REPLACE THIS with your real Stripe Payment Link from dashboard.stripe.com/payment-links ──
+const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/REPLACE_WITH_YOUR_LINK';
+
 function submitCheckout() {
   const name  = document.getElementById('co-name').value.trim();
   const phone = document.getElementById('co-phone').value.trim();
@@ -1223,37 +1226,44 @@ function submitCheckout() {
   const occasion = document.getElementById('co-occasion').value;
   const notes    = document.getElementById('co-notes').value.trim();
 
-  // Build order summary text for the message
+  // Build order summary
   const orderLines = cart.map(item => {
     const addons = item.addons.length ? ' [+ ' + item.addons.map(a => a.name).join(', ') + ']' : '';
     return item.name + addons + ' - $' + itemTotal(item);
   }).join('\n');
 
-  // Send via mailto as fallback (swap for a real backend/Formspree later)
+  // 1. Email order details to Petals & Places
   const subject = encodeURIComponent('New Order from ' + name + ' - Petals & Places');
   const body = encodeURIComponent(
-    'NEW ORDER REQUEST\n' +
-    '================\n\n' +
-    'CUSTOMER INFO\n' +
+    'NEW ORDER\n================\n\n' +
     'Name: ' + name + '\n' +
     'Phone: ' + phone + '\n' +
-    (email ? 'Email: ' + email + '\n' : '') +
-    (ig ? 'Instagram: ' + ig + '\n' : '') +
+    (email    ? 'Email: ' + email + '\n' : '') +
+    (ig       ? 'Instagram: ' + ig + '\n' : '') +
     'Date Needed: ' + date + '\n' +
     (occasion ? 'Occasion: ' + occasion + '\n' : '') +
     '\nORDER\n' + orderLines +
     '\nTotal: $' + cartGrandTotal() +
-    (notes ? '\n\nNOTES\n' + notes : '')
+    (notes    ? '\n\nNOTES\n' + notes : '')
   );
 
-  window.location.href = 'mailto:petalsnplaces@gmail.com?subject=' + subject + '&body=' + body;
+  // Open email in background tab so Stripe opens cleanly
+  const mailLink = 'mailto:petalsnplaces@gmail.com?subject=' + subject + '&body=' + body;
+  const mailWin = window.open(mailLink, '_blank');
 
-  showToast('Order sent! We will be in touch soon 💌');
+  // 2. Redirect to Stripe Payment Link
+  // Stripe lets you pre-fill the customer email via ?prefilled_email=
+  const stripeUrl = STRIPE_PAYMENT_LINK +
+    (email ? '?prefilled_email=' + encodeURIComponent(email) : '');
+
   setTimeout(() => {
-    closeCheckoutModal();
-    cart = [];
-    updateCartUI();
-  }, 1500);
+    window.location.href = stripeUrl;
+  }, 400);
+
+  showToast('Redirecting to secure payment... 💳');
+  cart = [];
+  updateCartUI();
+  closeCheckoutModal();
 }
 
 // ── Modal ─────────────────────────────────
