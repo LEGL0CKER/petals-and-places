@@ -50,10 +50,10 @@ body { background:var(--cream); color:var(--charcoal); font-family:'Jost',sans-s
 
 /* ── NAV ── */
 nav {
-  position:fixed; top:0; left:0; right:0; z-index:100;
+  position:fixed; top:0; left:0; right:0; z-index:150;
   display:flex; align-items:center; justify-content:space-between;
   padding:18px 48px;
-  background:rgba(253,246,239,.92); backdrop-filter:blur(16px);
+  background:rgba(253,246,239,.96); backdrop-filter:blur(16px);
   border-bottom:1px solid rgba(193,96,106,.12);
   transition:padding .3s;
 }
@@ -165,11 +165,12 @@ h1.hero-title { font-family:'Great Vibes',cursive; font-size:clamp(3.5rem,6vw,7r
 }
 
 /* ── REVEAL ANIMATIONS ── */
-.reveal,.reveal-left,.reveal-right { opacity:0; transition:opacity .8s ease,transform .8s ease; }
-.reveal { transform:translateY(36px); }
-.reveal-left { transform:translateX(-40px); }
-.reveal-right { transform:translateX(40px); }
-.reveal.visible,.reveal-left.visible,.reveal-right.visible { opacity:1; transform:none; }
+/* Default: visible. JS adds .js-reveal to body to enable animations */
+.reveal,.reveal-left,.reveal-right { opacity:1; transform:none; transition:opacity .8s ease,transform .8s ease; }
+.js-reveal .reveal        { opacity:0; transform:translateY(32px); }
+.js-reveal .reveal-left   { opacity:0; transform:translateX(-36px); }
+.js-reveal .reveal-right  { opacity:0; transform:translateX(36px); }
+.reveal.visible,.reveal-left.visible,.reveal-right.visible { opacity:1 !important; transform:none !important; }
 
 /* ── SECTION SHARED ── */
 section { position:relative; z-index:2; }
@@ -870,10 +871,32 @@ function closeMobileNav() {
 }
 
 // ── Scroll Reveal ─────────────────────────
+// Enable animation class only after JS confirms it can run
+document.body.classList.add('js-reveal');
+
+function checkVisible() {
+  document.querySelectorAll('.reveal,.reveal-left,.reveal-right').forEach(el => {
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight * 0.96) el.classList.add('visible');
+  });
+}
+
+// Immediate check for anything already in view
+setTimeout(checkVisible, 50);
+setTimeout(checkVisible, 300);
+
+// Observer for elements scrolled into view
 const revealObs = new IntersectionObserver(entries => {
   entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
-}, { threshold: 0.08, rootMargin:'0px 0px -40px 0px' });
+}, { threshold: 0.05, rootMargin:'0px' });
 document.querySelectorAll('.reveal,.reveal-left,.reveal-right').forEach(el => revealObs.observe(el));
+
+// Safety net — reveal everything after 2s no matter what
+setTimeout(() => {
+  document.querySelectorAll('.reveal,.reveal-left,.reveal-right').forEach(el => el.classList.add('visible'));
+}, 2000);
+
+window.addEventListener('scroll', checkVisible, {passive:true});
 
 // ── Cart ──────────────────────────────────
 let cart = [];
