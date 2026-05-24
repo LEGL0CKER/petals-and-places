@@ -427,6 +427,65 @@ footer { background:var(--charcoal); color:white; padding:56px 0 28px; }
   .hero-btns { flex-direction:column; }
   .btn-primary,.btn-secondary { text-align:center; }
 }
+
+/* Add-on clickable styles */
+.addon-clickable {
+  cursor: pointer;
+  position: relative;
+  transition: background .2s, transform .15s, box-shadow .2s;
+}
+.addon-clickable:hover {
+  background: rgba(255,255,255,.18) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,.15);
+}
+.addon-clickable:active { transform: scale(.97); }
+.addon-plus {
+  margin-left: auto;
+  font-size: 1.1rem;
+  color: var(--gold);
+  font-weight: 300;
+  flex-shrink: 0;
+  padding-left: 8px;
+}
+.addon-bouquet-btn {
+  width: 100%;
+  background: var(--cream);
+  border: 1.5px solid rgba(193,96,106,.2);
+  border-radius: 12px;
+  padding: 14px 18px;
+  text-align: left;
+  cursor: pointer;
+  font-family: 'Jost', sans-serif;
+  font-size: .9rem;
+  color: var(--charcoal);
+  transition: all .2s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.addon-bouquet-btn:hover {
+  background: var(--blush);
+  border-color: var(--rose);
+  color: var(--deep);
+}
+.addon-bouquet-name { font-family: 'Cormorant Garamond', serif; font-size: 1rem; color: var(--deep); font-weight: 500; }
+.addon-bouquet-price { font-size: .8rem; color: #8a6b6b; }
+.addon-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: rgba(193,96,106,.08);
+  border: 1px solid rgba(193,96,106,.2);
+  border-radius: 100px;
+  padding: 2px 8px;
+  font-size: .72rem;
+  color: var(--rose);
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+.addon-tag-remove {
+  background: none; border: none; cursor: pointer;
+  color: var(--rose); font-size: .8rem; padding: 0 2px; line-height: 1;
+}
 </style>
 </head>
 <body>
@@ -442,6 +501,23 @@ footer { background:var(--charcoal); color:white; padding:56px 0 28px; }
   <a href="#process" onclick="closeMobileNav()">How It Works</a>
   <a href="#contact" onclick="closeMobileNav()">Contact</a>
   <a href="#" onclick="openModal();closeMobileNav()" style="color:var(--rose)">Custom Order 🌺</a>
+</div>
+
+<!-- Addon Picker Modal -->
+<div class="modal-overlay" id="addonModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeAddonModal()">✕</button>
+    <div class="modal-icon" id="addonModalIcon">✨</div>
+    <div class="modal-title" id="addonModalTitle">Add-On</div>
+    <div id="addonModalPrice" style="text-align:center;font-family:'Cormorant Garamond',serif;font-size:1.6rem;color:var(--rose);margin-bottom:8px;"></div>
+    <div class="modal-sub" id="addonModalSub">Choose which bouquet to add this to:</div>
+    <div id="addonBouquetList" style="display:flex;flex-direction:column;gap:10px;margin-top:8px;"></div>
+    <div id="addonEmptyMsg" style="display:none;text-align:center;padding:20px 0;">
+      <div style="font-size:2rem;margin-bottom:12px;">🌸</div>
+      <p style="color:#6b4f4f;font-size:.9rem;margin-bottom:16px;">Add a bouquet to your cart first, then come back to add extras!</p>
+      <a href="#shop" onclick="closeAddonModal()" class="btn-primary" style="display:inline-block;padding:12px 28px;">Shop Bouquets</a>
+    </div>
+  </div>
 </div>
 
 <!-- Cart Sidebar -->
@@ -713,17 +789,18 @@ footer { background:var(--charcoal); color:white; padding:56px 0 28px; }
     <div class="addons-section reveal">
       <div class="addons-title">Add-Ons</div>
       <div class="addons-sub">Customize your bouquet with these extras</div>
+      <p style="text-align:center;font-size:.8rem;color:rgba(255,255,255,.45);margin-bottom:20px;">👇 Tap any add-on to attach it to a bouquet in your cart</p>
       <div class="addons-grid">
-        <div class="addon-item"><span class="addon-name">Additional Colors</span><span class="addon-price">$35</span></div>
-        <div class="addon-item"><span class="addon-name">Baby's Breath Rim</span><span class="addon-price">$15</span></div>
-        <div class="addon-item"><span class="addon-name">Baby's Breath Letters (up to 4)</span><span class="addon-price">$20</span></div>
-        <div class="addon-item"><span class="addon-name">Pearl Mesh</span><span class="addon-price">$5</span></div>
-        <div class="addon-item"><span class="addon-name">Custom Banner</span><span class="addon-price">$5</span></div>
-        <div class="addon-item"><span class="addon-name">Gold Butterflies</span><span class="addon-price">$5</span></div>
-        <div class="addon-item"><span class="addon-name">Lily Add-Ons (4 or less)</span><span class="addon-price">$20–$25</span></div>
-        <div class="addon-item"><span class="addon-name">Additional Flower Border</span><span class="addon-price">$15+</span></div>
-        <div class="addon-item"><span class="addon-name">Plush (stuffed animal)</span><span class="addon-price">from $15</span></div>
-        <div class="addon-item"><span class="addon-name">Special Colored Roses (black, blue, green)</span><span class="addon-price">$25 each</span></div>
+        <div class="addon-item addon-clickable" onclick="openAddonPicker('Additional Colors','$35',35)" data-name="Additional Colors" data-price="35"><span class="addon-name">Additional Colors</span><span class="addon-price">$35</span><span class="addon-plus">＋</span></div>
+        <div class="addon-item addon-clickable" onclick="openAddonPicker('Baby's Breath Rim','$15',15)" data-name="Baby's Breath Rim" data-price="15"><span class="addon-name">Baby's Breath Rim</span><span class="addon-price">$15</span><span class="addon-plus">＋</span></div>
+        <div class="addon-item addon-clickable" onclick="openAddonPicker('Baby's Breath Letters','$20',20)" data-name="Baby's Breath Letters" data-price="20"><span class="addon-name">Baby's Breath Letters (up to 4)</span><span class="addon-price">$20</span><span class="addon-plus">＋</span></div>
+        <div class="addon-item addon-clickable" onclick="openAddonPicker('Pearl Mesh','$5',5)" data-name="Pearl Mesh" data-price="5"><span class="addon-name">Pearl Mesh</span><span class="addon-price">$5</span><span class="addon-plus">＋</span></div>
+        <div class="addon-item addon-clickable" onclick="openAddonPicker('Custom Banner','$5',5)" data-name="Custom Banner" data-price="5"><span class="addon-name">Custom Banner</span><span class="addon-price">$5</span><span class="addon-plus">＋</span></div>
+        <div class="addon-item addon-clickable" onclick="openAddonPicker('Gold Butterflies','$5',5)" data-name="Gold Butterflies" data-price="5"><span class="addon-name">Gold Butterflies</span><span class="addon-price">$5</span><span class="addon-plus">＋</span></div>
+        <div class="addon-item addon-clickable" onclick="openAddonPicker('Lily Add-Ons','$25',25)" data-name="Lily Add-Ons" data-price="25"><span class="addon-name">Lily Add-Ons (4 or less)</span><span class="addon-price">$20–$25</span><span class="addon-plus">＋</span></div>
+        <div class="addon-item addon-clickable" onclick="openAddonPicker('Additional Flower Border','$15',15)" data-name="Additional Flower Border" data-price="15"><span class="addon-name">Additional Flower Border</span><span class="addon-price">$15+</span><span class="addon-plus">＋</span></div>
+        <div class="addon-item addon-clickable" onclick="openAddonPicker('Plush','$15',15)" data-name="Plush" data-price="15"><span class="addon-name">Plush (stuffed animal)</span><span class="addon-price">from $15</span><span class="addon-plus">＋</span></div>
+        <div class="addon-item addon-clickable" onclick="openAddonPicker('Special Colored Roses','$25',25)" data-name="Special Colored Roses" data-price="25"><span class="addon-name">Special Colored Roses (black, blue, green)</span><span class="addon-price">$25 each</span><span class="addon-plus">＋</span></div>
       </div>
     </div>
   </div>
@@ -908,35 +985,57 @@ setTimeout(() => {
 window.addEventListener('scroll', checkVisible, {passive:true});
 
 // ── Cart ──────────────────────────────────
-let cart = [];
+let cart = []; // [{name, price, addons:[{name,price}]}]
 
 function addToCartBtn(btn) {
   addToCart(btn.getAttribute('data-name'), parseInt(btn.getAttribute('data-price')));
 }
 function addToCart(name, price) {
-  cart.push({name, price});
+  cart.push({ name, price, addons: [] });
   updateCartUI();
   openCart();
   showToast('Added: ' + name + ' 🌸');
 }
-function removeFromCart(i) { cart.splice(i,1); updateCartUI(); }
+function removeFromCart(i) {
+  cart.splice(i, 1);
+  updateCartUI();
+}
+function removeAddon(cartIdx, addonIdx) {
+  cart[cartIdx].addons.splice(addonIdx, 1);
+  updateCartUI();
+}
+function itemTotal(item) {
+  return item.price + item.addons.reduce((s, a) => s + a.price, 0);
+}
+function cartGrandTotal() {
+  return cart.reduce((s, item) => s + itemTotal(item), 0);
+}
 function updateCartUI() {
   document.getElementById('cartCount').textContent = cart.length;
-  const total = cart.reduce((s,i) => s+i.price, 0);
-  document.getElementById('cartTotal').textContent = '$' + total;
+  document.getElementById('cartTotal').textContent = '$' + cartGrandTotal();
   const el = document.getElementById('cartItems');
   if (!cart.length) {
     el.innerHTML = '<div class="cart-empty"><div class="cart-empty-icon">🌸</div><p>Your cart is empty</p></div>';
     return;
   }
-  el.innerHTML = cart.map((item,i) => `
+  el.innerHTML = cart.map((item, i) => {
+    const addonsHtml = item.addons.length
+      ? '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">' +
+          item.addons.map((a, j) =>
+            `<span class="addon-tag">+ ${a.name} ($${a.price})<button class="addon-tag-remove" onclick="removeAddon(${i},${j})">✕</button></span>`
+          ).join('') +
+        '</div>'
+      : '';
+    return `
     <div class="cart-item">
       <div class="cart-item-info">
         <div class="cart-item-name">${item.name}</div>
-        <div class="cart-item-price">$${item.price}</div>
+        <div class="cart-item-price">$${itemTotal(item)}</div>
+        ${addonsHtml}
       </div>
       <button class="cart-item-remove" onclick="removeFromCart(${i})">✕</button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 function openCart() {
   document.getElementById('cartOverlay').classList.add('open');
@@ -946,6 +1045,56 @@ function closeCart() {
   document.getElementById('cartOverlay').classList.remove('open');
   document.getElementById('cartSidebar').classList.remove('open');
 }
+
+// ── Add-on Picker ─────────────────────────
+let pendingAddon = null;
+
+function openAddonPicker(name, priceLabel, price) {
+  pendingAddon = { name, price };
+  document.getElementById('addonModalTitle').textContent = name;
+  document.getElementById('addonModalPrice').textContent = priceLabel;
+
+  const list = document.getElementById('addonBouquetList');
+  const empty = document.getElementById('addonEmptyMsg');
+  const sub = document.getElementById('addonModalSub');
+
+  if (!cart.length) {
+    list.style.display = 'none';
+    empty.style.display = 'block';
+    sub.style.display = 'none';
+  } else {
+    list.style.display = 'flex';
+    empty.style.display = 'none';
+    sub.style.display = 'block';
+    list.innerHTML = cart.map((item, i) => `
+      <button class="addon-bouquet-btn" onclick="attachAddon(${i})">
+        <div>
+          <div class="addon-bouquet-name">${item.name}</div>
+          <div class="addon-bouquet-price">Bouquet: $${item.price} · Total with add-on: $${itemTotal(item) + price}</div>
+        </div>
+        <span style="color:var(--rose);font-size:1.2rem;">→</span>
+      </button>`).join('');
+  }
+  document.getElementById('addonModal').classList.add('open');
+}
+
+function attachAddon(cartIdx) {
+  if (!pendingAddon) return;
+  cart[cartIdx].addons.push({ ...pendingAddon });
+  pendingAddon = null;
+  closeAddonModal();
+  updateCartUI();
+  openCart();
+  showToast('Add-on attached! 🌸');
+}
+
+function closeAddonModal() {
+  document.getElementById('addonModal').classList.remove('open');
+  pendingAddon = null;
+}
+document.getElementById('addonModal').addEventListener('click', function(e) {
+  if (e.target === this) closeAddonModal();
+});
 
 // ── Stripe Checkout ───────────────────────
 // Replace with your real Stripe Payment Link URL from dashboard.stripe.com
