@@ -602,7 +602,7 @@ footer { background:var(--charcoal); color:white; padding:56px 0 28px; }
           <div class="product-desc">A heartfelt gift for any occasion. Includes your custom printed banner.</div>
           <div class="product-footer">
             <span class="product-price">$65</span>
-            <button class="btn-add" onclick="addToCart('12 Roses with Banner',65)">Add →</button>
+            <button class="btn-add" data-name="12 Roses with Banner" data-price="65" onclick="addToCartBtn(this)">Add →</button>
           </div>
         </div>
       </div>
@@ -616,7 +616,7 @@ footer { background:var(--charcoal); color:white; padding:56px 0 28px; }
           <div class="product-desc">A cheerful seasonal mix of garden blooms — delphinium, gerbera, roses & more.</div>
           <div class="product-footer">
             <span class="product-price">$80</span>
-            <button class="btn-add" onclick="addToCart('Small Mixed Bouquet',80)">Add →</button>
+            <button class="btn-add" data-name="Small Mixed Bouquet" data-price="80" onclick="addToCartBtn(this)">Add →</button>
           </div>
         </div>
       </div>
@@ -630,7 +630,7 @@ footer { background:var(--charcoal); color:white; padding:56px 0 28px; }
           <div class="product-desc">25 premium roses surrounded by a lush ring of baby's breath. Includes custom banner.</div>
           <div class="product-footer">
             <span class="product-price">$110</span>
-            <button class="btn-add" onclick="addToCart(&quot;25 Roses with Baby's Breath Rim&quot;,110)">Add →</button>
+            <button class="btn-add" data-name="25 Roses with Baby's Breath Rim" data-price="110" onclick="addToCartBtn(this)">Add →</button>
           </div>
         </div>
       </div>
@@ -645,7 +645,7 @@ footer { background:var(--charcoal); color:white; padding:56px 0 28px; }
           <div class="product-desc">36 roses in bold custom colors — black, blue, or green. Colors not found in nature.</div>
           <div class="product-footer">
             <span class="product-price">$145</span>
-            <button class="btn-add" onclick="addToCart('36 Specialty Colored Roses',145)">Add →</button>
+            <button class="btn-add" data-name="36 Specialty Colored Roses" data-price="145" onclick="addToCartBtn(this)">Add →</button>
           </div>
         </div>
       </div>
@@ -660,7 +660,7 @@ footer { background:var(--charcoal); color:white; padding:56px 0 28px; }
           <div class="product-desc">50 premium roses in a bold black wrap, adorned with intricate gold butterfly accents.</div>
           <div class="product-footer">
             <span class="product-price">$175</span>
-            <button class="btn-add" onclick="addToCart('50 Roses with Butterflies',175)">Add →</button>
+            <button class="btn-add" data-name="50 Roses with Butterflies" data-price="175" onclick="addToCartBtn(this)">Add →</button>
           </div>
         </div>
       </div>
@@ -674,7 +674,7 @@ footer { background:var(--charcoal); color:white; padding:56px 0 28px; }
           <div class="product-desc">A stunning mix of red, pink & white roses wrapped in pearl mesh with a custom banner.</div>
           <div class="product-footer">
             <span class="product-price">$210</span>
-            <button class="btn-add" onclick="addToCart('75 Mixed Roses with Pearl Mesh',210)">Add →</button>
+            <button class="btn-add" data-name="75 Mixed Roses with Pearl Mesh" data-price="210" onclick="addToCartBtn(this)">Add →</button>
           </div>
         </div>
       </div>
@@ -688,7 +688,7 @@ footer { background:var(--charcoal); color:white; padding:56px 0 28px; }
           <div class="product-desc">A generous mix of ranunculus, tulips, gerbera daisies & seasonal blooms.</div>
           <div class="product-footer">
             <span class="product-price">$160</span>
-            <button class="btn-add" onclick="addToCart('Medium Mixed Bouquet',160)">Add →</button>
+            <button class="btn-add" data-name="Medium Mixed Bouquet" data-price="160" onclick="addToCartBtn(this)">Add →</button>
           </div>
         </div>
       </div>
@@ -703,7 +703,7 @@ footer { background:var(--charcoal); color:white; padding:56px 0 28px; }
           <div class="product-desc">The ultimate grand gesture. 100 premium roses fully personalized with your custom banner.</div>
           <div class="product-footer">
             <span class="product-price">$300</span>
-            <button class="btn-add" onclick="addToCart('100 Roses with Custom Banner',300)">Add →</button>
+            <button class="btn-add" data-name="100 Roses with Custom Banner" data-price="300" onclick="addToCartBtn(this)">Add →</button>
           </div>
         </div>
       </div>
@@ -910,6 +910,9 @@ window.addEventListener('scroll', checkVisible, {passive:true});
 // ── Cart ──────────────────────────────────
 let cart = [];
 
+function addToCartBtn(btn) {
+  addToCart(btn.getAttribute('data-name'), parseInt(btn.getAttribute('data-price')));
+}
 function addToCart(name, price) {
   cart.push({name, price});
   updateCartUI();
@@ -964,7 +967,7 @@ document.getElementById('orderModal').addEventListener('click', function(e) {
 function submitCustomOrder() {
   const name = document.getElementById('mo-name').value.trim();
   if (!name) { showToast('Please enter your name!'); return; }
-  showToast('Request sent! We'll be in touch soon 💌');
+  showToast('Request sent! We will be in touch soon 💌');
   closeModal();
 }
 
