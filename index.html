@@ -11,9 +11,9 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
 body{background:var(--cream);color:var(--charcoal);font-family:'Jost',sans-serif;overflow-x:hidden;}
-@media(pointer:fine){body{cursor:none;}.cursor{display:block;}.cursor-ring{display:block;}}
-.cursor{display:none;width:12px;height:12px;background:var(--rose);border-radius:50%;position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s;}
-.cursor-ring{display:none;width:36px;height:36px;border:1.5px solid var(--rose);border-radius:50%;position:fixed;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);opacity:.5;transition:transform .15s ease-out,width .25s,height .25s;}
+
+.cursor{width:14px;height:14px;background:var(--rose);border-radius:50%;position:fixed;pointer-events:none;z-index:9999;left:-200px;top:-200px;transform:translate(-50%,-50%);transition:width .2s,height .2s,opacity .15s;opacity:0;}
+.cursor-ring{width:40px;height:40px;border:2px solid var(--rose);border-radius:50%;position:fixed;pointer-events:none;z-index:9998;left:-200px;top:-200px;transform:translate(-50%,-50%);opacity:0;transition:width .25s,height .25s,opacity .15s;}
 .petals-container{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden;}
 .petal{position:absolute;top:-40px;animation:fall linear infinite;}
 @keyframes fall{0%{transform:translateY(-40px) rotate(0deg);opacity:.5;}100%{transform:translateY(105vh) rotate(720deg) translateX(60px);opacity:0;}}
@@ -589,13 +589,31 @@ footer{background:var(--charcoal);color:white;padding:56px 0 28px;}
 const cursor = document.getElementById('cursor');
 const ring = document.getElementById('cursorRing');
 if (window.matchMedia('(pointer:fine)').matches) {
+  // Hide native cursor via JS so it only affects real mouse users
+  document.body.style.cursor = 'none';
   document.addEventListener('mousemove', e => {
-    cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px';
-    setTimeout(() => { ring.style.left = e.clientX + 'px'; ring.style.top = e.clientY + 'px'; }, 80);
+    cursor.style.left  = e.clientX + 'px';
+    cursor.style.top   = e.clientY + 'px';
+    cursor.style.opacity = '1';
+    setTimeout(() => {
+      ring.style.left    = e.clientX + 'px';
+      ring.style.top     = e.clientY + 'px';
+      ring.style.opacity = '0.45';
+    }, 75);
   });
-  document.querySelectorAll('a,button,.product-card,.gallery-item,.pricing-item').forEach(el => {
-    el.addEventListener('mouseenter', () => { cursor.style.width='20px'; cursor.style.height='20px'; });
-    el.addEventListener('mouseleave', () => { cursor.style.width='12px'; cursor.style.height='12px'; });
+  document.addEventListener('mouseleave', () => {
+    cursor.style.opacity = '0';
+    ring.style.opacity   = '0';
+  });
+  document.querySelectorAll('a, button, .gallery-item, .pricing-item, .addon-clickable').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.style.width = '22px'; cursor.style.height = '22px';
+      ring.style.width   = '58px'; ring.style.height   = '58px';
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.style.width = '14px'; cursor.style.height = '14px';
+      ring.style.width   = '40px'; ring.style.height   = '40px';
+    });
   });
 }
 
